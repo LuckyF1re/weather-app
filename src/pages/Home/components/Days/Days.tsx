@@ -80,8 +80,8 @@ export const Days = (props: DaysType) => {
         <>
             <Tabs/>
             <div className={styles.days}>
-                {days.map((day: DayType) => (
-                    <Card key={day.iconId}  day={day}/>
+                {days.map((day: DayType, index: number) => (
+                    <Card key={index}  day={day}/>
                 ))}
             </div>
 
