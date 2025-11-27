@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss';
+@use '../../styles/variables.scss'  as *;
 
 .popup {
   position: absolute;
@@ -12,7 +12,7 @@
   padding: 40px;
   max-width: 750px;
   width: 100%;
-  background: $lite-background;
+  background: var(#{--components-background-default});
   box-shadow: $box-shadow;
   border-radius: $border-radius;
 }
@@ -52,7 +52,7 @@
   .dayName {
     font-size: 25px;
     line-height: 30px;
-    color: #000000;
+    color: var(#{--text-color-default});
     margin-bottom: 12px;
   }
   .img {

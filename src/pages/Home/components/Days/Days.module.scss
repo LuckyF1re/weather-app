@@ -1,14 +1,16 @@
-@import '../../../../styles/variables.scss';
+@use '../../../../styles/variables.scss' as *;
 
 .days {
   display: flex;
-  justify-content: space-between;
+  justify-content: left;
+  //justify-content: space-between;
   flex-wrap: wrap;
   padding: 20px;
   width: 100%;
   background: var(#{--components-background-default});
   box-shadow: $box-shadow;
   border-radius: 0 0 $border-radius $border-radius;
+  gap: 20px;
 }
 
 .card {
@@ -25,6 +27,7 @@
     margin-bottom: 7px;
     font-size: 18px;
     color: var(#{--text-color-default});
+    text-transform: capitalize;
   }
 
   .dayInfo {
@@ -51,6 +54,7 @@
   .info {
     font-size: 13px;
     color: $base-color;
+    text-transform: capitalize;
   }
 
   &:hover {

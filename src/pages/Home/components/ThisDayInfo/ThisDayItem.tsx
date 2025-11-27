@@ -9,7 +9,6 @@ type ThisDayItemType = {
 export const ThisDayItem = ({item}: ThisDayItemType) => {
 
     const {iconId, name, value} = item;
-
     return (
         <div className={styles.item}>
             <div className={styles.indicator}>

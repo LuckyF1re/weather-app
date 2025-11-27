@@ -2,59 +2,92 @@ import styles from './Popup.module.scss'
 import {ThisDayItem} from "../../pages/Home/components/ThisDayInfo/ThisDayItem.tsx";
 import type {ItemType} from "../../pages/Home/components/ThisDayInfo/ThisDayInfo.tsx";
 import {GlobalSvgSelector} from "../../assets/icons/shared/GlobalSvgSelector.tsx";
+import type {DayType} from "../../pages/Home/components/Days/Days.tsx";
+import {useCustomSelector} from "../../hooks/hooksForStore.ts";
+import {selectMaxDayWeatherData} from "../../store/selectors.ts";
+import {transformListToWeather} from "../../utils/transformListToWeather.ts";
+import {formatWeatherData} from "../../utils/formatWeatherData.ts";
 
-export const Popup = () => {
+type PopupType = {
+    isOpen: boolean;
+    day: DayType | null;
+    onClose: () => void;
+}
 
-    const items = [
-        {
-            iconId: "temp",
-            name: 'Температура',
-            value: '20° - ощущается как 17°'
-        },
-        {
-            iconId: "pressure",
-            name: 'Давление',
-            value: '765 мм ртутного столба - нормальное'
-        },
-        {
-            iconId: "precipitation",
-            name: 'Осадки',
-            value: 'Без осадков'
-        },
-        {
-            iconId: "wind",
-            name: 'Ветер',
-            value: '3 м/с юго-запад - легкий ветер'
-        },
-    ];
+export const Popup = (props: PopupType) => {
+    const {isOpen, day, onClose} = props;
+
+    const {weatherList} = useCustomSelector(selectMaxDayWeatherData)
+    const city = useCustomSelector(state => state.citySliceReducer.label);
+
+    // Если попап закрыт - не рендерим ничего
+    if (!isOpen) return null;
+
+
+
+    // 👇 Защита от undefined и проверка что данные загружены
+    if (!day || !weatherList?.length) {
+        return (
+            <>
+                <div className={styles.blur} onClick={onClose}></div>
+                <div className={styles.popup}>
+                    <div className={styles.loading}>Загрузка данных...</div>
+                    <div className={styles.close} onClick={onClose}>
+                        <GlobalSvgSelector id={"close"}/>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    // 👇 Преобразуем данные с проверкой
+    const transformedData = transformListToWeather(weatherList, day.dt, city);
+
+    if (!transformedData) {
+        return (
+            <>
+                <div className={styles.blur} onClick={onClose}></div>
+                <div className={styles.popup}>
+                    <div className={styles.error}>Данные не найдены</div>
+                    <div className={styles.close} onClick={onClose}>
+                        <GlobalSvgSelector id={"close"}/>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    // 👇 Форматируем данные
+    const formattedItems = formatWeatherData(transformedData);
 
     return (
         <>
-            <div className={styles.blur}></div>
+            <div className={styles.blur} onClick={onClose}></div>
             <div className={styles.popup}>
                 <div className={styles.day}>
-                    <div className={styles.dayTemp}>12°</div>
-                    <div className={styles.dayName}>Среда</div>
-                    <div className={styles.dayImg}><GlobalSvgSelector id="sun"/></div>
+                    <div className={styles.dayTemp}>{Math.round(transformedData.main.temp)}°</div>
+                    <div className={styles.dayName}>{day.day}</div>
+                    <div className={styles.dayImg}>
+                        <GlobalSvgSelector id={day.iconId}/>
+                    </div>
                     <div className={styles.dayTime}>
-                        Время: <span>01:08</span>
+                        Дата: {day.dayInfo}
                     </div>
                     <div className={styles.dayCity}>
-                        Город: <span>Минск</span>
+                        Город: <span>{city}</span>
                     </div>
-
-
                 </div>
+
                 <div className={styles.thisDayInfoItems}>
-                    {items.map((item: ItemType) =>
+                    {formattedItems.map((item: ItemType) =>
                         <ThisDayItem key={item.iconId} item={item} />
                     )}
                 </div>
-                <div className={styles.close}>
+
+                <div className={styles.close} onClick={onClose}>
                     <GlobalSvgSelector id={"close"}/>
                 </div>
             </div>
         </>
     );
 };
-

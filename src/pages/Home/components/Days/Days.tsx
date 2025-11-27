@@ -1,10 +1,12 @@
 import styles from './Days.module.scss'
 import {Card} from "./Card.tsx";
 import {Tabs} from "./Tabs.tsx";
-
-type DaysType = {
-
-}
+import {useCustomSelector} from "../../../../hooks/hooksForStore.ts";
+import {selectMaxDayWeatherData} from "../../../../store/selectors.ts";
+import {daysArrayConvertation} from "../../../../utils/formatMaxDayWeatherData.ts";
+import {useState} from "react";
+import {storage} from "../../../../model/Storage.ts";
+import {Spinner} from "../Loader/Spinner.tsx";
 
 export type DayType = {
     day: string,
@@ -13,80 +15,41 @@ export type DayType = {
     tempDay: string,
     tempNight: string,
     info: string,
+    dt: number,
 }
 
-export const Days = (props: DaysType) => {
+export const Days = () => {
 
-    const days: DayType[] = [
-        {
-            day: "Сегодня",
-            dayInfo: "20 ноя",
-            iconId: "sun",
-            tempDay: "+18",
-            tempNight: "+15",
-            info: "Облачно"
-        },
-        {
-            day: "Завтра",
-            dayInfo: "21 ноя",
-            iconId: "smallRain",
-            tempDay: "+18",
-            tempNight: "+15",
-            info: "Небольшой дождь и солнце"
-        },
-        {
-            day: "Сб",
-            dayInfo: "22 ноя",
-            iconId: "smallRainSun",
-            tempDay: "+18",
-            tempNight: "+15",
-            info: "Небольшой дождь"
-        },
-        {
-            day: "Вс",
-            dayInfo: "23 ноя",
-            iconId: "mainlyCloudy",
-            tempDay: "+18",
-            tempNight: "+15",
-            info: "Облачно"
-        },
-        {
-            day: "Пн",
-            dayInfo: "24 ноя",
-            iconId: "sun",
-            tempDay: "+18",
-            tempNight: "+15",
-            info: "Облачно"
-        },
-        {
-            day: "Вт",
-            dayInfo: "25 ноя",
-            iconId: "sun",
-            tempDay: "+18",
-            tempNight: "+15",
-            info: "Облачно"
-        },
-        {
-            day: "Ср",
-            dayInfo: "26 ноя",
-            iconId: "sun",
-            tempDay: "+18",
-            tempNight: "+15",
-            info: "Облачно"
-        },
-    ]
+    const [viewDays, setViewDays] = useState<number>(storage.getItem("daysCount") || 3)
+    const {weatherList} = useCustomSelector(selectMaxDayWeatherData)
+    const daysWeatherData = daysArrayConvertation(weatherList)
+    const trimDaysWeatherData = daysWeatherData.slice(0, viewDays)
+    const onClickChangeFilterHandler = (daysCount: number) => {
+        setViewDays(daysCount)
+        storage.setItem("daysCount", daysCount)
+    }
+
+    const { isLoading } = useCustomSelector(selectMaxDayWeatherData);
+
+    if (isLoading) {
+        return (
+            <div className={styles.days} >
+                <Spinner />
+            </div>
+        );
+    }
 
     return (
         <>
-            <Tabs/>
+            <Tabs onClickChangeFilterHandler={onClickChangeFilterHandler} vievDays={viewDays}/>
             <div className={styles.days}>
-                {days.map((day: DayType, index: number) => (
-                    <Card key={index}  day={day}/>
+                {trimDaysWeatherData.map((day: DayType, index: number) => (
+                    <Card
+                        key={index}
+                        day={day}
+                    />
                 ))}
             </div>
-
-
         </>
-
     );
 };

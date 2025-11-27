@@ -1,10 +1,11 @@
 import styles from './ThisDayInfo.module.scss';
 import country from '../../../../assets/images/RBwithoutBG.png'
 import {ThisDayItem} from "./ThisDayItem.tsx";
+import {useCustomSelector} from "../../../../hooks/hooksForStore.ts";
+import {selectCurrentWeatherData, selectMaxDayWeatherData} from "../../../../store/selectors.ts";
+import {formatWeatherData} from "../../../../utils/formatWeatherData.ts";
+import {Spinner} from "../Loader/Spinner.tsx";
 
-type ThisDayInfoType = {
-
-}
 
 export type ItemType = {
     iconId: string
@@ -12,30 +13,19 @@ export type ItemType = {
     value: string
 }
 
-export const ThisDayInfo = (props: ThisDayInfoType) => {
-
-    const items = [
-        {
-            iconId: "temp",
-            name: 'Температура',
-            value: '20° - ощущается как 17°'
-        },
-        {
-            iconId: "pressure",
-            name: 'Давление',
-            value: '765 мм ртутного столба - нормальное'
-        },
-        {
-            iconId: "precipitation",
-            name: 'Осадки',
-            value: 'Без осадков'
-        },
-        {
-            iconId: "wind",
-            name: 'Ветер',
-            value: '3 м/с юго-запад - легкий ветер'
-        },
-    ];
+export const ThisDayInfo = () => {
+    const {weather} = useCustomSelector(
+        selectCurrentWeatherData);
+    const { isLoading } = useCustomSelector(selectMaxDayWeatherData);
+    if (isLoading) {
+        return (
+            <div className={styles.thisDayInfo} >
+                <Spinner />
+            </div>
+        );
+    }
+    
+const items  = formatWeatherData(weather);
 
     return (
         <div className={styles.thisDayInfo}>
